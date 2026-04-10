@@ -93,7 +93,12 @@ function isToday(dateString: string): boolean {
  */
 async function fetchSingleSitemap(source: SitemapSource): Promise<NewsArticle[]> {
   try {
-    const response = await fetch(source.url, {
+    // Use CORS proxy for blocked sites on Vercel
+    const fetchUrl = source.name === 'Shiksha' 
+      ? `https://api.allorigins.win/raw?url=${encodeURIComponent(source.url)}`
+      : source.url;
+
+    const response = await fetch(fetchUrl, {
       next: { revalidate: 0 }, // No caching
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',

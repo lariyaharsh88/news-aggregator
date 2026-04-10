@@ -93,12 +93,9 @@ function isToday(dateString: string): boolean {
  */
 async function fetchSingleSitemap(source: SitemapSource): Promise<NewsArticle[]> {
   try {
-    // Use CORS proxy for blocked sites on Vercel
-    const fetchUrl = source.name === 'Shiksha' 
-      ? `https://api.allorigins.win/raw?url=${encodeURIComponent(source.url)}`
-      : source.url;
-
-    const response = await fetch(fetchUrl, {
+    // Use Cloudflare workers proxy for Shiksha (bypasses Akamai)
+    let fetchUrl = source.url;
+    let options: RequestInit = {
       next: { revalidate: 0 }, // No caching
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
@@ -107,7 +104,14 @@ async function fetchSingleSitemap(source: SitemapSource): Promise<NewsArticle[]>
         'Connection': 'keep-alive',
         'Upgrade-Insecure-Requests': '1',
       },
-    });
+    };
+
+    // Shiksha blocks Vercel IPs - use proxy
+    if (source.name === 'Shiksha') {
+      fetchUrl = `https://corsproxy.io/?${encodeURIComponent(source.url)}`;
+    }
+
+    const response = await fetch(fetchUrl, options);
 
     if (!response.ok) {
       console.error(`Failed to fetch ${source.name}: ${response.status}`);

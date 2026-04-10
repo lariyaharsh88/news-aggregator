@@ -65,13 +65,11 @@ export default function NewsDashboard({
   // Fetch Shiksha client side only
   const fetchShikshaClientSide = async () => {
     try {
-      const response = await fetch('https://www.shiksha.com/NewsIndex1.xml', {
+      const response = await fetch('/api/proxy/shiksha', {
         headers: {
-          'User-Agent': navigator.userAgent,
           'Accept': 'application/xml,text/xml,*/*;q=0.9',
-          'Referer': 'https://www.shiksha.com/',
         },
-        credentials: 'include'
+        cache: 'no-store'
       });
       
       if (response.ok) {

@@ -62,10 +62,37 @@ export default function NewsDashboard({
     }
   }, [selectedSources, allArticles, sources.length]);
 
+  // Fetch Shiksha client side only
+  const fetchShikshaClientSide = async () => {
+    try {
+      const response = await fetch('https://www.shiksha.com/NewsIndex1.xml', {
+        headers: {
+          'User-Agent': navigator.userAgent,
+          'Accept': 'application/xml,text/xml,*/*;q=0.9',
+          'Referer': 'https://www.shiksha.com/',
+        },
+        credentials: 'include'
+      });
+      
+      if (response.ok) {
+        const xmlText = await response.text();
+        // Parse and add Shiksha articles here
+        console.log('Shiksha fetched successfully client side');
+      }
+    } catch (err) {
+      console.log('Shiksha client fetch failed:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchShikshaClientSide();
+  }, []);
+
   // Auto-refresh every 60 seconds
   useEffect(() => {
     const interval = setInterval(() => {
       handleRefresh();
+      fetchShikshaClientSide();
     }, 60000); // 60 seconds
 
     return () => clearInterval(interval);

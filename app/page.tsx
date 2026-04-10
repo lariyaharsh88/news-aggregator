@@ -3,6 +3,7 @@ import NewsDashboard from "@/components/NewsDashboard";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+export const runtime = "edge";
 
 export const metadata = {
   title: "Latest Education News Today",

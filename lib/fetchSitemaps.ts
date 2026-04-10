@@ -104,18 +104,9 @@ async function fetchSingleSitemap(source: SitemapSource): Promise<NewsArticle[]>
       cache: 'no-store'
     };
 
-    // Try direct first, will fall back silently if fails
+    // Shiksha blocks server IPs - always use proxy on hosted environments
     if (source.name === 'Shiksha') {
-      try {
-        const directResponse = await fetch(fetchUrl, options);
-        if (directResponse.ok) {
-          const xmlText = await directResponse.text();
-          return parseSitemapResponse(xmlText, source);
-        }
-      } catch {}
-      
-      // Fallback to different proxy
-      fetchUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(source.url)}`;
+      fetchUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(source.url)}&rand=${Date.now()}`;
     }
 
     const response = await fetch(fetchUrl, options);

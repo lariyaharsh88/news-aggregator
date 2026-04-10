@@ -23,7 +23,13 @@ export default function NewsDashboard({
     new Set(initialSources)
   );
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    setLastRefresh(new Date());
+  }, []);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [seenArticleUrls, setSeenArticleUrls] = useState<Set<string>>(new Set(initialArticles.map(a => a.url)));
   const [selectedArticle, setSelectedArticle] = useState<NewsArticle | null>(null);
@@ -217,7 +223,7 @@ export default function NewsDashboard({
               </button>
               </div>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Last updated: {lastRefresh.toLocaleTimeString("en-IN")}
+                Last updated: {mounted && lastRefresh ? lastRefresh.toLocaleTimeString("en-IN") : ''}
               </p>
               <p className="text-xs text-gray-400">Auto-refresh: 60s</p>
             </div>

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { fetchAllSitemaps, getUniqueSources } from "@/lib/fetchSitemaps";
 
 export const dynamic = "force-dynamic";
+export const runtime = "edge";
 export const revalidate = 0;
 
 export async function GET() {

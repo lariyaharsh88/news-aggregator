@@ -93,22 +93,29 @@ function isToday(dateString: string): boolean {
  */
 async function fetchSingleSitemap(source: SitemapSource): Promise<NewsArticle[]> {
   try {
-    // Use Cloudflare workers proxy for Shiksha (bypasses Akamai)
     let fetchUrl = source.url;
     let options: RequestInit = {
       next: { revalidate: 0 }, // No caching
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 14_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/xml,text/xml,*/*;q=0.9',
+        'Accept-Language': 'en-US,en;q=0.9',
       },
+      cache: 'no-store'
     };
 
-    // Shiksha blocks Vercel IPs - use proxy
+    // Try direct first, will fall back silently if fails
     if (source.name === 'Shiksha') {
-      fetchUrl = `https://corsproxy.io/?${encodeURIComponent(source.url)}`;
+      try {
+        const directResponse = await fetch(fetchUrl, options);
+        if (directResponse.ok) {
+          const xmlText = await directResponse.text();
+          return parseSitemapResponse(xmlText, source);
+        }
+      } catch {}
+      
+      // Fallback to different proxy
+      fetchUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(source.url)}`;
     }
 
     const response = await fetch(fetchUrl, options);
@@ -119,13 +126,22 @@ async function fetchSingleSitemap(source: SitemapSource): Promise<NewsArticle[]>
     }
 
     const xmlText = await response.text();
+    return parseSitemapResponse(xmlText, source);
+  } catch (error) {
+    console.error(`Error fetching ${source.name}:`, error);
+    return [];
+  }
+}
+
+function parseSitemapResponse(xmlText: string, source: SitemapSource): NewsArticle[] {
+  try {
     const parser = new XMLParser({
       ignoreAttributes: false,
       attributeNamePrefix: "@_",
     });
 
     const result = parser.parse(xmlText);
-    
+      
     // Handle different XML structures
     let urls: any[] = [];
     
@@ -159,7 +175,7 @@ async function fetchSingleSitemap(source: SitemapSource): Promise<NewsArticle[]>
 
     return articles;
   } catch (error) {
-    console.error(`Error fetching ${source.name}:`, error);
+    console.error(`Error parsing ${source.name} sitemap:`, error);
     return [];
   }
 }

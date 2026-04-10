@@ -1,36 +1,144 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Latest Education News Today
+
+A production-ready Next.js application that aggregates news articles in real-time from multiple XML sitemap URLs.
+
+## Features
+
+✅ **Real-time Data Fetching** - Fetches fresh data from XML sitemaps without any database or storage  
+✅ **IST Timezone Filtering** - Only shows articles published today in Indian Standard Time  
+✅ **Auto-refresh** - Automatically refreshes every 60 seconds  
+✅ **Manual Refresh** - Refresh button for on-demand updates  
+✅ **Source Filtering** - Filter articles by source with checkboxes  
+✅ **Parallel Fetching** - All sitemaps fetched in parallel using Promise.all  
+✅ **Error Handling** - Graceful error handling if sitemaps fail  
+✅ **Loading States** - Beautiful skeleton loaders  
+✅ **Empty States** - User-friendly message when no news is available  
+✅ **Responsive Design** - Works on all devices  
+✅ **SEO Optimized** - Proper meta tags and page titles
+
+## Data Sources
+
+The application aggregates news from these education portals:
+
+- **Shiksha** - https://www.shiksha.com/NewsIndex1.xml
+- **CollegeDunia** - https://collegedunia.com/sitemap-news-updates.xml
+- **Careers360** - https://news.careers360.com/news-sitemap.xml
+- **Jagran Josh** - https://www.jagranjosh.com/newsitemap-news-english.xml
+
+## Tech Stack
+
+- **Next.js 14+** (App Router)
+- **TypeScript**
+- **Tailwind CSS**
+- **fast-xml-parser** - Lightweight XML parsing
+
+## Project Structure
+
+```
+news-aggregator/
+├── app/
+│   ├── api/
+│   │   └── news/
+│   │       └── route.ts          # API endpoint for fetching news
+│   ├── layout.tsx                # Root layout with metadata
+│   ├── page.tsx                  # Main page (server component)
+│   └── globals.css               # Global styles
+├── components/
+│   ├── NewsDashboard.tsx         # Main client component with auto-refresh
+│   ├── NewsCard.tsx              # Individual news card component
+│   ├── LoadingSkeleton.tsx       # Loading state component
+│   └── EmptyState.tsx            # Empty state component
+├── lib/
+│   ├── fetchSitemaps.ts          # Core fetching and parsing logic
+│   └── types.ts                  # TypeScript interfaces
+└── package.json
+```
 
 ## Getting Started
 
-First, run the development server:
+### Installation
+
+```bash
+cd news-aggregator
+npm install
+```
+
+### Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Production Build
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## How It Works
 
-To learn more about Next.js, take a look at the following resources:
+### 1. Server-Side Initial Fetch
+- The main page (`app/page.tsx`) is a server component
+- On page load, it fetches all sitemaps in parallel
+- Filters articles to only include today's news (IST timezone)
+- Passes initial data to the client component
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 2. Client-Side Auto-Refresh
+- `NewsDashboard` component handles client-side state
+- Auto-refreshes every 60 seconds via `setInterval`
+- Manual refresh button available
+- Uses `/api/news` endpoint for fresh data
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 3. Filtering Logic
+- Only articles with `lastmod` date matching today (IST) are shown
+- Articles sorted by `lastmod` DESC (latest first)
+- Source filtering via checkboxes (client-side)
 
-## Deploy on Vercel
+### 4. IST Timezone Handling
+- All date comparisons use IST (UTC+5:30)
+- Properly handles timezone conversion
+- Displays times in IST format
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Key Features Explained
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### No Database/Storage
+- All data fetched fresh from sitemaps on every request
+- No caching (using `revalidate: 0` and `force-dynamic`)
+- Ensures real-time data
+
+### Parallel Fetching
+- Uses `Promise.allSettled()` to fetch all sitemaps simultaneously
+- If one sitemap fails, others still load
+- Significantly faster than sequential fetching
+
+### Error Handling
+- Try-catch blocks around all fetch operations
+- Graceful degradation if sitemaps are unavailable
+- Console logging for debugging
+
+### Performance
+- Server-side rendering for initial load
+- Client-side updates for subsequent refreshes
+- Optimized re-renders with React hooks
+
+## Environment Variables
+
+No environment variables required! All sitemap URLs are hardcoded as per requirements.
+
+## Browser Support
+
+- Chrome (latest)
+- Firefox (latest)
+- Safari (latest)
+- Edge (latest)
+
+## License
+
+MIT
+
+## Author
+
+Built with ❤️ using Next.js
